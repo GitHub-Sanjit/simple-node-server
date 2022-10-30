@@ -27,12 +27,28 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-client.connect((err) => {
-  const collection = client.db("simpleNode").collection("users");
-  // perform actions on the collection object
-  console.log("database connected");
-  client.close();
-});
+
+async function run() {
+  try {
+    const userCollection = client.db("simpleNode").collection("users");
+    const user = { name: "Baby Sarkar", email: "baby@gmail.com" };
+    // const result = await userCollection.insertOne(user);
+    // console.log(result);
+    app.post("/users", async (req, res) => {
+      console.log("Post API Called");
+      const user = req.body;
+      const result = await userCollection.insertOne(user);
+      console.log(result);
+      user.id = result.insertedId;
+
+      res.send(user);
+    });
+  } finally {
+    // await client.close();
+  }
+}
+
+run().catch(console.dir);
 
 // Mongo DB Code End
 
@@ -48,16 +64,16 @@ app.get("/users", (req, res) => {
   }
 });
 
-app.post("/users", (req, res) => {
-  console.log("Post API Called");
-  const user = req.body;
-  user.id = users.length + 1;
-  users.push(user);
+// app.post("/users", (req, res) => {
+//   console.log("Post API Called");
+//   const user = req.body;
+//   user.id = users.length + 1;
+//   users.push(user);
 
-  console.log(user);
-  res.send(user);
-});
+//   console.log(user);
+//   res.send(user);
+// });
 
 app.listen(port, () => {
-  console.log(`Simple node Server running on port $${port}`);
+  console.log(`Simple node Server running on port ${port}`);
 });
